@@ -330,20 +330,19 @@ public class DriveTrain extends SubsystemBase {
         m_swerveDrive.setMaximumSpeeds(maxSpeed, maxSpeed, maxAngSpeed);
     }
 
-    @Override
-    public void periodic() {
-        // Have the vision system update based on the Apriltags, if seen
-        // need to add the pipeline result
-        // m_swerveDrive.addVisionMeasurement
-        m_aprilTagVision.updateOdometry(m_swerveDrive);
-    }
+    // @Override
+    // public void periodic() {
+    //     // Have the vision system update based on the Apriltags, if seen
+    //     // need to add the pipeline result
+    //     m_aprilTagVision.updateOdometry(m_swerveDrive);
+    // }
 
-    @Override
-    public void simulationPeriodic() {
-        // update the Apriltag sim. Needs the robot pose
-        Pose2d robotPose = getPose();
-        m_aprilTagVision.updateSimulation(robotPose);
-    }
+    // @Override
+    // public void simulationPeriodic() {
+    //     // update the Apriltag sim. Needs the robot pose
+    //     Pose2d robotPose = getPose();
+    //     m_aprilTagVision.updateSimulation(robotPose);
+    // }
 
     /**
      * Get the swerve drive kinematics object.
@@ -363,7 +362,6 @@ public class DriveTrain extends SubsystemBase {
      * @param pose The pose to set the odometry to
      */
     public void setPose(Pose2d pose) {
-        System.out.println("Drivetrain.setPose " + pose);
         m_swerveDrive.resetOdometry(pose);
     }
 
