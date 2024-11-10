@@ -9,8 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-    private Command m_autonomousCommand;
-    
+    private Command m_autonomousCommand = null;
+    private boolean m_prevIsRedAlliance = true;
+
     private RobotContainer m_robotContainer;
     
     @Override
@@ -27,7 +28,20 @@ public class Robot extends TimedRobot {
     public void disabledInit() {}
     
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+        if (isSimulation()) {
+            // YAGSL bug fix (Nov 2024)
+            // The simulation needs to be told the drive speed every loop, even when disabled 
+            m_robotContainer.getDriveTrain().drive(0, 0, 0, false);
+        }
+
+        boolean isRedAlliance = FieldConstants.isRedAlliance();
+        if (m_autonomousCommand == null || isRedAlliance != m_prevIsRedAlliance) {
+            m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+            m_robotContainer.getDriveTrain().setPose(m_robotContainer.getInitialPose());
+            m_prevIsRedAlliance = isRedAlliance;
+        }
+    }
     
     @Override
     public void disabledExit() {}

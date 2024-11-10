@@ -197,8 +197,7 @@ public class DriveTrain extends SubsystemBase {
      */
     public void drive(double translationX, double translationY, double angularRotation, boolean robotCentric) {
         // field centric: flip direction if we are Red
-        // robot centric (for 2024): input is on the BACK of the robot, so flip to match the camera
-        double flipDirection = (robotCentric || FieldConstants.isRedAlliance()) ? -1.0 : 1.0;
+        double flipDirection = FieldConstants.isRedAlliance() ? -1.0 : 1.0;
 
         double v_x = flipDirection * translationX * m_swerveDrive.getMaximumVelocity();
         double v_y = flipDirection * translationY * m_swerveDrive.getMaximumVelocity();
@@ -261,28 +260,6 @@ public class DriveTrain extends SubsystemBase {
     public Command followPath(PathPlannerPath path) {
         // Create a path following command using AutoBuilder. This will also trigger event markers.
         return AutoBuilder.followPath(path);
-    }
-
-    /**
-     * Use PathPlanner Path finding to go to a point on the field.
-     *
-     * @param pose Target {@link Pose2d} to go to.
-     * @return PathFinding command
-     */
-    public Command driveToPose(Pose2d pose) {
-        // Create the constraints to use while pathfinding
-        PathConstraints constraints = new PathConstraints(
-                Math.min(PATH_PLANNER_MAX_SPEED, m_swerveDrive.getMaximumVelocity()), PATH_PLANNER_MAX_ACCELERATION,
-                Math.min(PATH_PLANNER_MAX_ANGULAR_SPEED, m_swerveDrive.getMaximumAngularVelocity()), PATH_PLANNER_MAX_ANGULAR_ACCELERATION);
-
-        // Since AutoBuilder is configured, we can use it to build pathfinding commands
-        return AutoBuilder.pathfindToPose(
-                pose,
-                constraints,
-                0.0, // Goal end velocity in meters/sec
-                0.0 // Rotation delay distance in meters. This is how far the robot should travel
-                    // before attempting to rotate.
-        );
     }
 
     public static PathPlannerPath loadPath(String pathName) {

@@ -5,16 +5,22 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-// import frc.robot.commands.*;
+import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private static final double JOYSTICK_DEADBAND = 0.05;
+
+    // Need to know where the robot starts on the field
+    // For this simulation, just make it fixed
+    // Location: x = 2 meters, y = 1/2 of field, angle is forward
+    private static final Pose2d START_LOCATION = new Pose2d(2.0, FieldConstants.FIELD_WIDTH/2.0, Rotation2d.fromDegrees(0));
 
     private final CommandXboxController m_driverController = new CommandXboxController(0);
 
@@ -23,7 +29,6 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        configureAutos();
 
         m_driveTrain.setDefaultCommand(getDriveCommand());
     }
@@ -34,11 +39,12 @@ public class RobotContainer {
         }
     }
     
-    private void configureAutos() {
+    public Command getAutonomousCommand() {
+        return new SimpleAuto(m_driveTrain);
     }
 
-    public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+    public Pose2d getInitialPose() {
+        return FieldConstants.flipPose(START_LOCATION);
     }
 
     public Command getDriveCommand() {
@@ -50,9 +56,9 @@ public class RobotContainer {
         return m_driveTrain.driveCommand( 
                 () -> -conditionAxis(m_driverController.getLeftY()),
                 () -> -conditionAxis(m_driverController.getLeftX()),
+                () -> -conditionAxis(m_driverController.getRightX()),
                 // if you have a Logitech controller:
-                () -> -conditionAxis(m_driverController.getRawAxis(2)),
-                // () -> -conditionAxis(m_driverController.getRightX()),
+                // () -> -conditionAxis(m_driverController.getRawAxis(2)),
                 m_driverController.rightBumper());
     }
 
@@ -60,5 +66,9 @@ public class RobotContainer {
         value = MathUtil.applyDeadband(value, JOYSTICK_DEADBAND);
         // Square the axis, retaining the sign
         return Math.abs(value) * value;
+    }
+
+    public DriveTrain getDriveTrain() {
+        return m_driveTrain;
     }
 }
