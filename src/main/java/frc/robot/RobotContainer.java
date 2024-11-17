@@ -26,6 +26,7 @@ public class RobotContainer {
 
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision);
+    private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
         configureBindings();
@@ -37,6 +38,9 @@ public class RobotContainer {
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);
         }
+
+        m_driverController.a().onTrue(new SetElevatorHeight(m_elevator, 1.0));
+        m_driverController.b().onTrue(new SetElevatorHeight(m_elevator, 0.0));
     }
     
     public Command getAutonomousCommand() {

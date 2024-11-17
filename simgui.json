@@ -1,12 +1,25 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Elevator Sim": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-AprilTag/Sim Field": "Field2d",
       "/SmartDashboard/navX-Sensor[1]": "Gyro"
     },
     "windows": {
+      "/SmartDashboard/Elevator Sim": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "XModules": {
           "arrows": false,
@@ -27,10 +40,23 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Elevator Sim": {
+          "Elevator Root": {
+            "Elevator": {
+              "open": true
+            },
+            "open": true
+          },
+          "double[]##v_/SmartDashboard/Elevator Sim/dims": {
+            "open": true
+          }
+        },
         "Field": {
           "double[]##v_/SmartDashboard/Field/Robot": {
             "open": true
-          },
+          }
+        },
+        "elevator": {
           "open": true
         },
         "open": true
