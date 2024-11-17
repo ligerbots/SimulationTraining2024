@@ -57,7 +57,13 @@
           }
         },
         "elevator": {
-          "open": true
+          "feedforward": {
+            "open": true
+          },
+          "open": true,
+          "pid": {
+            "open": true
+          }
         },
         "open": true
       }

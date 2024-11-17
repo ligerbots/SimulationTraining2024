@@ -63,12 +63,15 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
             K_P,
             K_I,
             K_D,
-            new TrapezoidProfile.Constraints(2.45, 2.45));
-    ElevatorFeedforward m_feedforward = new ElevatorFeedforward(
-            FF_K_S,
-            FF_K_G,
-            FF_K_V,
-            FF_K_A);
+            new TrapezoidProfile.Constraints(1000, 1000));
+
+    // WPILib FF calculator does not allow you to change values, so do it ourselves
+    // ElevatorFeedforward m_feedforward = new ElevatorFeedforward(
+    //         FF_K_S,
+    //         FF_K_G,
+    //         FF_K_V,
+    //         FF_K_A);
+
     private final Encoder m_encoder = new Encoder(ENCODER_CHANNEL_A, ENCODER_CHANNEL_B);
     private final PWMSparkMax m_motor = new PWMSparkMax(PWM_PORT);
 
@@ -82,7 +85,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
             MAX_HEIGHT,
             true,
             0,
-            VecBuilder.fill(0.002));  // this is simulated noise = 2mm
+            VecBuilder.fill(0.0));  // this is simulated noise; turn off
 
     private final EncoderSim m_encoderSim = new EncoderSim(m_encoder);
     private final PWMSim m_motorSim = new PWMSim(m_motor);
@@ -101,22 +104,46 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
         // To view the Elevator visualization, select Network Tables -> SmartDashboard
         // -> Elevator Sim
         SmartDashboard.putData("Elevator Sim", m_mech2d);
+
+        // Put PID into NetworkTables so we can play
+        SmartDashboard.putNumber("elevator/pid/kP", K_P);
+        SmartDashboard.putNumber("elevator/pid/kI", K_I);
+        SmartDashboard.putNumber("elevator/pid/kD", K_D);
+
+        // FF in NetworkTables
+        SmartDashboard.putNumber("elevator/feedforward/kG", FF_K_G);
+        SmartDashboard.putNumber("elevator/feedforward/kV", FF_K_V);
     }
 
     @Override
     public void periodic() {
+        // set PID from NetworkTables
+        m_controller.setP(SmartDashboard.getNumber("elevator/pid/kP", K_P));
+        m_controller.setI(SmartDashboard.getNumber("elevator/pid/kI", K_I));
+        m_controller.setD(SmartDashboard.getNumber("elevator/pid/kD", K_D));
+
         // Update the telemetry, including mechanism visualization, regardless of mode.
         updateTelemetry();
-        SmartDashboard.putNumber("elevator/goal", m_controller.getGoal().position);
-        SmartDashboard.putNumber("elevator/position", m_encoder.getDistance());
+
+        double height = m_encoder.getDistance();
+        double goal = m_controller.getGoal().position;
+        SmartDashboard.putNumber("elevator/goal", goal);
+        SmartDashboard.putNumber("elevator/position", height);
+        SmartDashboard.putNumber("elevator/error", height - goal);
 
         // With the setpoint value we run PID control like normal
         double pidOutput = m_controller.calculate(m_encoder.getDistance());
-        double feedforwardOutput = m_feedforward.calculate(m_controller.getSetpoint().velocity);
+
+        // WPILib FF calculator does not allow you to change values, so do it ourselves
+        double kg = SmartDashboard.getNumber("elevator/feedforward/kG", FF_K_G);
+        double kv = SmartDashboard.getNumber("elevator/feedforward/kV", FF_K_V);
+        double feedforwardOutput = kg + kv * m_controller.getSetpoint().velocity;
+        if (goal < 0.01 && height < 0.01) feedforwardOutput = 0;
+
         double motorVolts = pidOutput + feedforwardOutput;
         m_motor.setVoltage(motorVolts);
 
-        SmartDashboard.putNumber("elevator/pidOutput", pidOutput);
+        SmartDashboard.putNumber("elevator/pid", pidOutput);
         SmartDashboard.putNumber("elevator/feedforward", feedforwardOutput);
         SmartDashboard.putNumber("elevator/volts", motorVolts);
     }
