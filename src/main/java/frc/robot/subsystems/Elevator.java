@@ -28,61 +28,62 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase implements AutoCloseable {
     public static final double HEIGHT_TOLERANCE = 0.0254; // meters = 1 inch
 
-    static final int kMotorPort = 0;
-    static final int kEncoderAChannel = 0;
-    static final int kEncoderBChannel = 1;
-    static final int kJoystickPort = 0;
+    static final int PWM_PORT = 0;
+    static final int ENCODER_CHANNEL_A = 0;
+    static final int ENCODER_CHANNEL_B = 1;
 
-    static final double kElevatorKp = 5;
-    static final double kElevatorKi = 0;
-    static final double kElevatorKd = 0;
+    // position control PID constants
+    static final double K_P = 5;
+    static final double K_I = 0;
+    static final double K_D = 0;
 
-    static final double kElevatorkS = 0.0; // volts (V)
-    static final double kElevatorkG = 0.762; // volts (V)
-    static final double kElevatorkV = 0.762; // volt per velocity (V/(m/s))
-    static final double kElevatorkA = 0.0; // volt per acceleration (V/(m/s²))
+    // feedforward parameters
+    static final double FF_K_S = 0.0; // volts (V)
+    static final double FF_K_G = 0.762; // volts (V)
+    static final double FF_K_V = 0.762; // volt per velocity (V/(m/s))
+    static final double FF_K_A = 0.0; // volt per acceleration (V/(m/s²))
 
-    static final double kElevatorGearing = 10.0;
-    static final double kElevatorDrumRadius = Units.inchesToMeters(2.0);
-    static final double kCarriageMass = 4.0; // kg
+    static final double GEAR_RATIO = 10.0;
+    static final double DRUM_RADIUS = Units.inchesToMeters(2.0);
+    static final double CARRIAGE_MASS = 4.0; // kg
 
-    static final double kSetpointMeters = 0.75;
     // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
-    static final double kMinElevatorHeightMeters = 0.0;
-    static final double kMaxElevatorHeightMeters = 1.25;
+    static final double MIN_HEIGHT = 0.0;
+    static final double MAX_HEIGHT = 1.25;
 
     // distance per pulse = (distance per revolution) / (pulses per revolution)
     // = (Pi * D) / ppr
-    static final double kElevatorEncoderDistPerPulse = 2.0 * Math.PI * kElevatorDrumRadius / 4096;
+    static final double DISTANCE_PER_PULSE = 2.0 * Math.PI * DRUM_RADIUS / 4096;
 
     // This gearbox represents a gearbox containing 4 Vex 775pro motors.
     private final DCMotor m_elevatorGearbox = DCMotor.getVex775Pro(4);
 
     // Standard classes for controlling our elevator
     private final ProfiledPIDController m_controller = new ProfiledPIDController(
-            kElevatorKp,
-            kElevatorKi,
-            kElevatorKd,
+            K_P,
+            K_I,
+            K_D,
             new TrapezoidProfile.Constraints(2.45, 2.45));
     ElevatorFeedforward m_feedforward = new ElevatorFeedforward(
-            kElevatorkS,
-            kElevatorkG,
-            kElevatorkV,
-            kElevatorkA);
-    private final Encoder m_encoder = new Encoder(kEncoderAChannel, kEncoderBChannel);
-    private final PWMSparkMax m_motor = new PWMSparkMax(kMotorPort);
+            FF_K_S,
+            FF_K_G,
+            FF_K_V,
+            FF_K_A);
+    private final Encoder m_encoder = new Encoder(ENCODER_CHANNEL_A, ENCODER_CHANNEL_B);
+    private final PWMSparkMax m_motor = new PWMSparkMax(PWM_PORT);
 
     // Simulation classes help us simulate what's going on, including gravity.
     private final ElevatorSim m_elevatorSim = new ElevatorSim(
             m_elevatorGearbox,
-            kElevatorGearing,
-            kCarriageMass,
-            kElevatorDrumRadius,
-            kMinElevatorHeightMeters,
-            kMaxElevatorHeightMeters,
+            GEAR_RATIO,
+            CARRIAGE_MASS,
+            DRUM_RADIUS,
+            MIN_HEIGHT,
+            MAX_HEIGHT,
             true,
             0,
-            VecBuilder.fill(0.01));
+            VecBuilder.fill(0.002));  // this is simulated noise = 2mm
+
     private final EncoderSim m_encoderSim = new EncoderSim(m_encoder);
     private final PWMSim m_motorSim = new PWMSim(m_motor);
 
@@ -94,7 +95,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
     /** Subsystem constructor. */
     public Elevator() {
-        m_encoder.setDistancePerPulse(kElevatorEncoderDistPerPulse);
+        m_encoder.setDistancePerPulse(DISTANCE_PER_PULSE);
 
         // Publish Mechanism2d to SmartDashboard
         // To view the Elevator visualization, select Network Tables -> SmartDashboard
@@ -112,7 +113,12 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
         // With the setpoint value we run PID control like normal
         double pidOutput = m_controller.calculate(m_encoder.getDistance());
         double feedforwardOutput = m_feedforward.calculate(m_controller.getSetpoint().velocity);
-        m_motor.setVoltage(pidOutput + feedforwardOutput);
+        double motorVolts = pidOutput + feedforwardOutput;
+        m_motor.setVoltage(motorVolts);
+
+        SmartDashboard.putNumber("elevator/pidOutput", pidOutput);
+        SmartDashboard.putNumber("elevator/feedforward", feedforwardOutput);
+        SmartDashboard.putNumber("elevator/volts", motorVolts);
     }
 
     /** Advance the simulation. */
@@ -120,7 +126,9 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
     public void simulationPeriodic() {
         // In this method, we update our simulation of what our elevator is doing
         // First, we set our "inputs" (voltages)
-        m_elevatorSim.setInput(m_motorSim.getSpeed() * RobotController.getBatteryVoltage());
+        double speed = m_motorSim.getSpeed();
+        SmartDashboard.putNumber("elevator/motorSpeed", speed);
+        m_elevatorSim.setInput(speed * RobotController.getBatteryVoltage());
 
         // Next, we update it. The standard loop time is 20ms.
         m_elevatorSim.update(0.020);
@@ -146,18 +154,13 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
         return m_encoder.getDistance();
     }
 
-    /** Stop the control loop and motor output. */
-    public void stop() {
-        m_controller.setGoal(0.0);
-        m_motor.set(0.0);
-    }
-
     /** Update telemetry, including the mechanism visualization. */
-    public void updateTelemetry() {
+    private void updateTelemetry() {
         // Update elevator visualization with position
         m_elevatorMech2d.setLength(m_encoder.getDistance());
     }
 
+    // for the simulation feed to NetworkTables
     @Override
     public void close() {
         m_encoder.close();
