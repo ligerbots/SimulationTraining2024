@@ -40,7 +40,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class DriveTrain extends SubsystemBase {
 
-    private static final double MAX_SPEED = Units.feetToMeters(14.5);
+    public static final double MAX_SPEED = Units.feetToMeters(14.5);
     
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
@@ -238,7 +238,7 @@ public class DriveTrain extends SubsystemBase {
      * @param speedAng - angular rotation speed (rad/s)
      * @param robotCentric - if true, x/y speeds are robot-centric
     */
-    private void driveWithSpeeds(double speedX, double speedY, double speedAng, boolean robotCentric) {
+    public void driveWithSpeeds(double speedX, double speedY, double speedAng, boolean robotCentric) {
         ChassisSpeeds speeds;
         if (robotCentric) {
             speeds = new ChassisSpeeds(speedX, speedY, speedAng);
