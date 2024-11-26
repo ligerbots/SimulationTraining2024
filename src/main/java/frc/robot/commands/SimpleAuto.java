@@ -19,7 +19,10 @@ public class SimpleAuto extends SequentialCommandGroup {
     /** Creates a new SimpleAuto. */
     public SimpleAuto(DriveTrain m_driveTrain) {
         // try {
-            PathPlannerPath startPath = PathPlannerPath.fromChoreoTrajectory("Test path");
+            //PathPlannerPath C1 to shoot
+            //ChoreoPath C1 to shoot
+            // PathPlannerPath startPath = PathPlannerPath.fromChoreoTrajectory("ChoreoPath C1 to shoot");
+            PathPlannerPath startPath = PathPlannerPath.fromPathFile("PathPlannerPath C1 to shoot");
             m_initPose = startPath.getStartingDifferentialPose();
             addCommands(m_driveTrain.followPath(startPath));
 
