@@ -15,7 +15,7 @@ import frc.robot.subsystems.DriveTrain;
 
 
 public class SimpleAuto extends SequentialCommandGroup {
-    private Pose2d m_initPose;
+    // private Pose2d m_initPose;
     /** Creates a new SimpleAuto. */
     public SimpleAuto(DriveTrain m_driveTrain) {
         // try {
@@ -23,7 +23,7 @@ public class SimpleAuto extends SequentialCommandGroup {
             //ChoreoPath C1 to shoot
             // PathPlannerPath startPath = PathPlannerPath.fromChoreoTrajectory("ChoreoPath C1 to shoot");
             PathPlannerPath startPath = PathPlannerPath.fromPathFile("PathPlannerPath C1 to shoot");
-            m_initPose = startPath.getStartingDifferentialPose();
+            // m_initPose = startPath.getStartingDifferentialPose();
             addCommands(m_driveTrain.followPath(startPath));
 
         // } catch (Exception e) {

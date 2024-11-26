@@ -8,6 +8,10 @@
     },
     "windows": {
       "/SmartDashboard/Field": {
+        "XModules": {
+          "arrows": false,
+          "style": "Hidden"
+        },
         "bottom": 1476,
         "height": 8.210550308227539,
         "left": 150,
@@ -25,14 +29,18 @@
       "SmartDashboard": {
         "Field": {
           "double[]##v_/SmartDashboard/Field/Robot": {
-            "open": false
+            "open": true
           },
-          "open": false
-        }
+          "open": true
+        },
+        "open": true
       }
     }
   },
   "NetworkTables Info": {
+    "Connections": {
+      "open": true
+    },
     "visible": true
   }
 }
