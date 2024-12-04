@@ -1,0 +1,74 @@
+{
+ "name":"2024 robot profile",
+ "version":"v2025.0.0",
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"6.3125 in",
+    "val":0.1603375
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11.4375 in",
+    "val":-0.2905125
+   },
+   "y":{
+    "exp":"10.875 in",
+    "val":0.276225
+   }
+  },
+  "mass":{
+   "exp":"150 lbs",
+   "val":68.0388555
+  },
+  "inertia":{
+   "exp":"8.18 kg m ^ 2",
+   "val":8.18
+  },
+  "gearing":{
+   "exp":"6.5",
+   "val":6.5
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"534.4896301307434 rad / s",
+   "val":534.4896301307434
+  },
+  "tmax":{
+   "exp":"1.0949416342412452 N m",
+   "val":1.0949416342412452
+  },
+  "bumper":{
+   "front":{
+    "exp":"17.8125 in",
+    "val":0.4524375
+   },
+   "side":{
+    "exp":"17.125 in",
+    "val":0.434975
+   },
+   "back":{
+    "exp":"17.8125 in",
+    "val":0.4524375
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[]
+}
