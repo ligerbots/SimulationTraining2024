@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import frc.robot.subsystems.DriveTrain;
@@ -20,15 +21,16 @@ public class SimpleAuto extends SequentialCommandGroup {
         // ChoreoPath C1 to shoot
         // PathPlannerPath startPath = PathPlannerPath.fromChoreoTrajectory("ChoreoPath C1 to shoot");
 
-        PathPlannerPath startPath = DriveTrain.loadPath("PathPlannerPath C1 to shoot");
-        m_initPose = startPath.getStartingDifferentialPose();
-        addCommands(driveTrain.followPath(startPath));
+        //crashes, can't load path
+        // PathPlannerPath startPath = DriveTrain.loadPath("PathPlannerPath C1 to shoot");
+        // m_initPose = startPath.getStartingDifferentialPose();
+        // addCommands(driveTrain.followPath(startPath));
         
-        // addCommands(
-        //         new DriveToPosition(driveTrain, new Translation2d(3.0, 0.0)),
-        //         new DriveToPosition(driveTrain, new Translation2d(0.0, 3.0)),
-        //         new DriveToPosition(driveTrain, new Translation2d(-3.0, 0.0)),
-        //         new DriveToPosition(driveTrain, new Translation2d(.0, -3.0))
-        // );
+        addCommands(
+                new DriveToPosition(driveTrain, new Translation2d(3.0, 0.0)),
+                new DriveToPosition(driveTrain, new Translation2d(0.0, 3.0)),
+                new DriveToPosition(driveTrain, new Translation2d(-3.0, 0.0)),
+                new DriveToPosition(driveTrain, new Translation2d(.0, -3.0))
+        );
     }
 }
