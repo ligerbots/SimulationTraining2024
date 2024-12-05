@@ -23,11 +23,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.config.PIDConstants;
 
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -57,16 +57,12 @@ public class DriveTrain extends SubsystemBase {
     private static final PIDConstants PATH_PLANNER_TRANSLATION_PID = new PIDConstants(3.0, 0, 0);
     private static final PIDConstants PATH_PLANNER_ANGLE_PID       = new PIDConstants(3.0, 0, 0);
 
-    // local overrides for PP max values. 
-    // These are combined using "min()" with the values computed from the JSON config files, where available.
-    private static final double PATH_PLANNER_MAX_SPEED = 4.5;
-    private static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
-    private static final double PATH_PLANNER_MAX_ANGULAR_SPEED = 4.5;
-    private static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
-
-    // Path following constraints
-    // (really is final, but compiler does not like separate initialization routine)
-    private HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG;
+    // // local overrides for PP max values. 
+    // // These are combined using "min()" with the values computed from the JSON config files, where available.
+    // private static final double PATH_PLANNER_MAX_SPEED = 4.5;
+    // private static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
+    // private static final double PATH_PLANNER_MAX_ANGULAR_SPEED = 4.5;
+    // private static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
     // if true, then robot is in field centric mode
     private boolean m_fieldCentric = true;
@@ -93,14 +89,14 @@ public class DriveTrain extends SubsystemBase {
     // Swerve drive object
     private final SwerveDrive m_swerveDrive;
 
-    private final AprilTagVision m_aprilTagVision;
+    // private final AprilTagVision m_aprilTagVision;
 
     /**
      * Initialize {@link SwerveDrive} with the directory provided.
      *
      * @param directory Directory of swerve drive config files.
      */
-    public DriveTrain(AprilTagVision apriltagVision) {
+    public DriveTrain() {
 
         // Angle conversion factor is 360 / (GEAR RATIO * ENCODER RESOLUTION)
         // In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
@@ -141,7 +137,7 @@ public class DriveTrain extends SubsystemBase {
         // for now (testing!!), turn off periodic sync of the absolute encoders
         m_swerveDrive.setModuleEncoderAutoSynchronize(false, 3.0);
 
-        m_aprilTagVision = apriltagVision;
+        // m_aprilTagVision = apriltagVision;
         
         setupPathPlanner();
     }
@@ -150,24 +146,54 @@ public class DriveTrain extends SubsystemBase {
      * Setup AutoBuilder for PathPlanner.
      */
     public void setupPathPlanner() {
-        PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-                PATH_PLANNER_TRANSLATION_PID,
-                PATH_PLANNER_ANGLE_PID,
-                4.5, // Max module speed, in m/s
-                m_swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters(),
-                // allow initial path replanning, but not dynamic
-                new ReplanningConfig(true, false)
-        );
+        try {
+            // Load the RobotConfig from the settings file created by GUI. 
+            // You should probably store this in your Constants file
+            RobotConfig config = RobotConfig.fromGUISettings();
 
-        AutoBuilder.configureHolonomic(
-                this::getPose, 
-                this::setPose, 
-                this::getRobotVelocity,
-                this::setChassisSpeeds, 
-                PATH_FOLLOWER_CONFIG,
-                () -> FieldConstants.isRedAlliance(),
-                this // Reference to this subsystem to set requirements
-        );
+            // TODO: fix code to allow FF
+            // final boolean enableFeedforward = true;
+            // Configure AutoBuilder last
+            AutoBuilder.configure(
+                    // Robot pose supplier
+                    this::getPose,
+                    // Method to reset odometry (will be called if your auto has a starting pose)
+                    this::setPose,
+                    // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                    this::getRobotVelocity,
+                    // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also
+                    // optionally outputs individual module feedforwards
+                    (speedsRobotRelative, moduleFeedForwards) -> {
+                        // if (enableFeedforward) {
+                        //     m_swerveDrive.drive(
+                        //             speedsRobotRelative,
+                        //             m_swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                        //             moduleFeedForwards.linearForces());
+                        // } else {
+                        m_swerveDrive.setChassisSpeeds(speedsRobotRelative);
+                        // }
+                    },
+                    // PPHolonomicController is the built in path following controller for holonomic
+                    // drive trains
+                    new PPHolonomicDriveController(
+                            PATH_PLANNER_TRANSLATION_PID,
+                            PATH_PLANNER_ANGLE_PID),
+                    // The robot configuration
+                    config,
+                    // whether to flip directions for Red
+                    () -> FieldConstants.isRedAlliance(),
+                    this
+            // Reference to this subsystem to set requirements
+            );
+
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+        }
+
+        // Preload PathPlanner Path finding
+        // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     /**
