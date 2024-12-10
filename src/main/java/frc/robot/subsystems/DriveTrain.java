@@ -32,7 +32,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
-import swervelib.math.SwerveMath;
+// import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -44,11 +44,11 @@ public class DriveTrain extends SubsystemBase {
     
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
-    private static final double STEER_GEAR_RATIO = (50.0 / 14.0) * (60.0 / 10.0);
+    // private static final double STEER_GEAR_RATIO = (50.0 / 14.0) * (60.0 / 10.0);
 
-    private static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
+    // private static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
     // This is the L2 gearing
-    private static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+    // private static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
 
     public static final double ROBOT_SWERVE_OFFSET_X_INCHES = -3.0;
     private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0 );
@@ -270,10 +270,15 @@ public class DriveTrain extends SubsystemBase {
     */
     public void driveWithSpeeds(double speedX, double speedY, double speedAng, boolean robotCentric) {
         ChassisSpeeds speeds;
-        if (robotCentric) {
-            speeds = new ChassisSpeeds(speedX, speedY, speedAng);
+        speeds = new ChassisSpeeds(speedX, speedY, speedAng);
+        //FIXME: May be wrong, had to update to toRobotRelativeSpeeds from fromFieldRelativeSpeeds
+        if (!robotCentric) {
+            // speeds = new ChassisSpeeds(speedX, speedY, speedAng);
+            speeds.toRobotRelativeSpeeds(m_swerveDrive.getOdometryHeading());
         } else {
-            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedAng, m_swerveDrive.getOdometryHeading());
+            // speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedAng, m_swerveDrive.getOdometryHeading());
+
+            // speeds.toRobotRelativeSpeeds(m_swerveDrive.getOdometryHeading());
         }
 
         // TODO: add in acceleration controls

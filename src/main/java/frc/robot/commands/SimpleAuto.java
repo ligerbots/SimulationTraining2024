@@ -22,15 +22,15 @@ public class SimpleAuto extends SequentialCommandGroup {
         // PathPlannerPath startPath = PathPlannerPath.fromChoreoTrajectory("ChoreoPath C1 to shoot");
 
         //crashes, can't load path
-        // PathPlannerPath startPath = DriveTrain.loadPath("PathPlannerPath C1 to shoot");
-        // m_initPose = startPath.getStartingDifferentialPose();
-        // addCommands(driveTrain.followPath(startPath));
+        PathPlannerPath startPath = DriveTrain.loadPath("PathPlannerPath C1 to shoot");
+        m_initPose = startPath.getStartingDifferentialPose();
+        addCommands(driveTrain.followPath(startPath));
         
-        addCommands(
-                new DriveToPosition(driveTrain, new Translation2d(3.0, 0.0)),
-                new DriveToPosition(driveTrain, new Translation2d(0.0, 3.0)),
-                new DriveToPosition(driveTrain, new Translation2d(-3.0, 0.0)),
-                new DriveToPosition(driveTrain, new Translation2d(.0, -3.0))
-        );
+        // addCommands(
+        //         new DriveToPosition(driveTrain, new Translation2d(3.0, 0.0)),
+        //         new DriveToPosition(driveTrain, new Translation2d(0.0, 3.0)),
+        //         new DriveToPosition(driveTrain, new Translation2d(-3.0, 0.0)),
+        //         new DriveToPosition(driveTrain, new Translation2d(.0, -3.0))
+        // );
     }
 }

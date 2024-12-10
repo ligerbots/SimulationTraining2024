@@ -15,7 +15,7 @@
     "driveWheelRadius": 0.0508,
     "driveGearing": 6.75,
     "maxDriveSpeed": 5.45,
-    "driveMotorType": "FALCON",
+    "driveMotorType": "falcon500",
     "driveCurrentLimit": 60.0,
     "wheelCOF": 1.2,
     "flModuleX": 0.276,
