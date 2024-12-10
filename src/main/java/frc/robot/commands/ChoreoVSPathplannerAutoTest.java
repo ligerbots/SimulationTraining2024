@@ -3,26 +3,19 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-
 import java.io.IOException;
-
 import org.json.simple.parser.ParseException;
-
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-
 import frc.robot.subsystems.DriveTrain;
 
-public class SimpleAuto extends SequentialCommandGroup {
-    private Pose2d m_initPose;
+public class ChoreoVSPathplannerAutoTest extends SequentialCommandGroup {
+    // private Pose2d m_initPose;
 
     /** Creates a new SimpleAuto. */
-    public SimpleAuto(DriveTrain driveTrain) {
+    public ChoreoVSPathplannerAutoTest(DriveTrain driveTrain) {
         //NOTE: TOGGLE TO FALSE TO USE PATH PLANNER PATH
         Boolean choreoPathEnabled = true;
 
@@ -40,7 +33,7 @@ public class SimpleAuto extends SequentialCommandGroup {
         } else {
             startPath = DriveTrain.loadPath("PathPlannerPath C1 to shoot");
         }
-        m_initPose = startPath.getStartingDifferentialPose();
+        // m_initPose = startPath.getStartingDifferentialPose();
         addCommands(driveTrain.followPath(startPath));
     }
 }

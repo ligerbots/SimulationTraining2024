@@ -40,7 +40,7 @@ public class RobotContainer {
     }
     
     public Command getAutonomousCommand() {
-        return new SimpleAuto(m_driveTrain);
+        return new ChoreoVSPathplannerAutoTest(m_driveTrain);
     }
 
     public Pose2d getInitialPose() {
